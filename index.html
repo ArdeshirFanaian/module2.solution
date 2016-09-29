@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en" ng-app="ShoppingListCheckOff">
+  <head>
+    <title>Shopping List Check Off</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+      .emptyMessage {
+        font-weight: bold;
+        color: red;
+        font-size: 1.2em;
+      }
+      li {
+        margin-bottom: 7px;
+        font-size: 1.2em;
+      }
+      li > button {
+        margin-left: 6px;
+      }
+      span {
+        color: green;
+      }
+    </style>
+  </head>
+<body>
+  <div class="container">
+  <h1>Shopping List Check Off</h1>
+
+  <div class="row">
+
+    <!-- To Buy List -->
+    <div class="col-md-6" ng-controller="ToBuyShoppingController as checkOff">
+     <h2>To Buy:</h2>
+     <ol>
+       <li ng-repeat="item in shoppingList">Buy {{item.quantity}} of
+         {{item.name}}<button class="btn btn-default" ng-click="checkOff.removeItem($index); checkOff.buyItem(item.name, item.quantity);">
+         Buy</button></li>
+     </ol>
+     <div ng-if="shoppingList.length === 0" class="emptyMessage">Everything is bought!</div>
+    </div>
+
+    <!-- Already Bought List -->
+    <div class="col-md-6" ng-controller="AlreadyBoughtShoppingController as AlrBou">
+     <h2>Already Bought:</h2>
+     <ol>
+       <li ng-repeat="x in AlrBou.boughtItems">
+          {{ x.quantity }} of {{ x.name }} <span class="glyphicon glyphicon-ok"></span>
+      </li>
+     </ol>
+     <div ng-if="AlrBou.boughtItems.length === 0" class="emptyMessage">Nothing bought yet.</div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+(function () {
+'use strict';
+
+var shoppingList = [
+  {
+    name: "Milk",
+    quantity: "2"
+  },
+  {
+    name: "Banana",
+    quantity: "5"
+  },
+  {
+    name: "Cookies",
+    quantity: "50"
+  },
+  {
+    name: "Orange Juice",
+    quantity: "1"
+  },
+  {
+    name: "Chocolate",
+    quantity: "5"
+  }
+];
+
+angular.module('ShoppingListCheckOff', [])
+.controller('ToBuyShoppingController', ToBuyShoppingController)
+.controller('AlreadyBoughtShoppingController', AlreadyBoughtShoppingController )
+.service('ShoppingListCheckOffService', ShoppingListCheckOffService);
+
+
+ToBuyShoppingController.$inject = ['ShoppingListCheckOffService', '$scope'];
+function ToBuyShoppingController(ShoppingListCheckOffService, $scope) {
+  $scope.shoppingList = shoppingList;
+
+  var checkOff = this;
+
+  checkOff.removeItem = function (index) {
+    ShoppingListCheckOffService.removeItem(index);
+  };
+
+  checkOff.buyItem = function (itemName, itemQuantity) {
+    ShoppingListCheckOffService.buyItem(itemName, itemQuantity)
+  }
+}
+
+
+AlreadyBoughtShoppingController.$inject = ['ShoppingListCheckOffService'];
+    function AlreadyBoughtShoppingController(ShoppingListCheckOffService) {
+      var AlrBou = this;
+
+      AlrBou.boughtItems = ShoppingListCheckOffService.showBoughtItems();
+    }
+
+
+function ShoppingListCheckOffService() {
+  var service = this;
+
+  // List of shopping items
+  var boughtItems = [];
+
+  service.buyItem = function (itemName, itemQuantity) {
+    var item = {
+      name: itemName,
+      quantity: itemQuantity,
+    };
+    boughtItems.push(item);
+  };
+
+  service.removeItem = function (itemIndex) {
+    shoppingList.splice(itemIndex, 1);
+  };
+
+  service.showBoughtItems = function () {
+    return boughtItems;
+  };
+
+}
+})();
+
+</script>
+</body>
+</html>
